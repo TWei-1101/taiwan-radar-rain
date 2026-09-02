@@ -1,10 +1,37 @@
 configuration:
+  location_name:
+    name: 第一個位置名稱
+    description: 第一組經緯度在 Home Assistant 顯示的名稱。
   latitude:
-    name: 緯度
-    description: 要監測位置的緯度。
+    name: 第一個位置緯度
+    description: 第一個監測位置的緯度。
   longitude:
-    name: 經度
-    description: 要監測位置的經度。
+    name: 第一個位置經度
+    description: 第一個監測位置的經度。
+  location_2_enabled:
+    name: 啟用第二個位置
+    description: 開啟第二組位置監測。
+  location_2_name:
+    name: 第二個位置名稱
+    description: 第二組經緯度在 Home Assistant 顯示的名稱。
+  latitude_2:
+    name: 第二個位置緯度
+    description: 啟用第二個位置時必須填寫。
+  longitude_2:
+    name: 第二個位置經度
+    description: 啟用第二個位置時必須填寫。
+  location_3_enabled:
+    name: 啟用第三個位置
+    description: 開啟第三組位置監測。
+  location_3_name:
+    name: 第三個位置名稱
+    description: 第三組經緯度在 Home Assistant 顯示的名稱。
+  latitude_3:
+    name: 第三個位置緯度
+    description: 啟用第三個位置時必須填寫。
+  longitude_3:
+    name: 第三個位置經度
+    description: 啟用第三個位置時必須填寫。
   rain_threshold_dbz:
     name: 降雨門檻
     description: 判定為降雨的最低雷達回波強度（dBZ）。

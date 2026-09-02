@@ -8,6 +8,7 @@
 
 - 直接解析 1.25 km dBZ 格點，不依賴圖片顏色
 - 分別計算住家周圍 1、3、10 km 最大回波
+- 單一程序可監測最多三組位置，共用同一次雷達資料下載
 - 用連續雷達幀估算雨區平移方向、速度與未來 10–60 分鐘開始／停止降雨 ETA
 - Home Assistant MQTT Discovery
 - 無需 CWA API Key；讀取中央氣象署公開歷史資料端點
@@ -53,6 +54,10 @@ HOME_LATITUDE=25.033 HOME_LONGITUDE=121.5654 radar-rain --once
 - 1 / 3 / 10 km 最大 dBZ、雨區距離、方向與速度等感測器
 
 實體 ID 可能因 Home Assistant 既有命名而略有不同；unique ID 固定以 `taiwan_radar_rain_` 開頭。
+
+## 多位置監測
+
+Home Assistant App 支援三組位置。第一組沿用既有實體；第二、第三組可分別啟用、命名並填入經緯度。每個位置會建立獨立 MQTT 裝置與完整實體，三組分析共用同一批雷達資料。
 
 ## 判斷方式
 

@@ -5,7 +5,7 @@ import json
 import paho.mqtt.client as mqtt
 
 from .analyzer import RainResult
-from .config import Settings
+from .config import Location, Settings
 
 SENSORS = {
     "status": ("Radar rain status", None, None),
@@ -22,7 +22,18 @@ SENSORS = {
 }
 
 
-def publish(settings: Settings, result: RainResult) -> None:
+def _identity(settings: Settings, location: Location) -> tuple[str, str, str]:
+    if location.primary:
+        return (
+            "taiwan_radar_rain",
+            "taiwan_radar_rain",
+            f"{settings.mqtt_topic}/state",
+        )
+    identifier = f"taiwan_radar_rain_{location.key}"
+    return identifier, identifier, f"{settings.mqtt_topic}/{location.key}/state"
+
+
+def publish(settings: Settings, results: list[tuple[Location, RainResult]]) -> None:
     if not settings.mqtt_host:
         return
     # Home Assistant base images may provide Paho MQTT 1.x or 2.x.
@@ -37,36 +48,74 @@ def publish(settings: Settings, result: RainResult) -> None:
     client.connect(settings.mqtt_host, settings.mqtt_port, 30)
     client.loop_start()
     messages = []
-    state_topic = f"{settings.mqtt_topic}/state"
-    device = {"identifiers": ["taiwan_radar_rain"], "name": "Taiwan Radar Rain", "manufacturer": "CWA"}
-    for key, (name, unit, device_class) in SENSORS.items():
-        payload = {
-            "name": name, "unique_id": f"taiwan_radar_rain_{key}", "state_topic": state_topic,
-            "value_template": "{{ value_json." + key + " }}", "device": device,
-        }
-        if unit:
-            payload["unit_of_measurement"] = unit
-        if device_class:
-            payload["device_class"] = device_class
-        topic = f"{settings.mqtt_discovery_prefix}/sensor/taiwan_radar_rain/{key}/config"
-        messages.append(client.publish(topic, json.dumps(payload), qos=1, retain=True))
     binary_sensors = (
         ("raining", "Radar raining", "moisture"),
         ("rain_incoming", "Radar rain approaching", None),
     )
-    for key, name, device_class in binary_sensors:
-        payload = {
-            "name": name, "unique_id": f"taiwan_radar_rain_{key}", "state_topic": state_topic,
-            "value_template": "{{ 'ON' if value_json." + key + " else 'OFF' }}",
-            "payload_on": "ON", "payload_off": "OFF", "device": device,
+
+    for location, result in results:
+        component_id, unique_prefix, state_topic = _identity(settings, location)
+        device = {
+            "identifiers": [component_id],
+            "name": f"Taiwan Radar Rain - {location.name}",
+            "manufacturer": "CWA",
         }
-        if device_class:
-            payload["device_class"] = device_class
-        topic = f"{settings.mqtt_discovery_prefix}/binary_sensor/taiwan_radar_rain/{key}/config"
-        messages.append(client.publish(topic, json.dumps(payload), qos=1, retain=True))
-    messages.append(
-        client.publish(state_topic, json.dumps(result.as_dict()), qos=1, retain=True)
-    )
+        for key, (name, unit, device_class) in SENSORS.items():
+            payload = {
+                "name": name,
+                "unique_id": f"{unique_prefix}_{key}",
+                "state_topic": state_topic,
+                "value_template": "{{ value_json." + key + " }}",
+                "device": device,
+            }
+            if unit:
+                payload["unit_of_measurement"] = unit
+            if device_class:
+                payload["device_class"] = device_class
+            topic = (
+                f"{settings.mqtt_discovery_prefix}/sensor/{component_id}/{key}/config"
+            )
+            messages.append(
+                client.publish(topic, json.dumps(payload), qos=1, retain=True)
+            )
+        for key, name, device_class in binary_sensors:
+            payload = {
+                "name": name,
+                "unique_id": f"{unique_prefix}_{key}",
+                "state_topic": state_topic,
+                "value_template": "{{ 'ON' if value_json." + key + " else 'OFF' }}",
+                "payload_on": "ON",
+                "payload_off": "OFF",
+                "device": device,
+            }
+            if device_class:
+                payload["device_class"] = device_class
+            topic = (
+                f"{settings.mqtt_discovery_prefix}/binary_sensor/"
+                f"{component_id}/{key}/config"
+            )
+            messages.append(
+                client.publish(topic, json.dumps(payload), qos=1, retain=True)
+            )
+        messages.append(
+            client.publish(state_topic, json.dumps(result.as_dict()), qos=1, retain=True)
+        )
+
+    for location_key in settings.disabled_location_keys():
+        component_id = f"taiwan_radar_rain_{location_key}"
+        for key in SENSORS:
+            topic = (
+                f"{settings.mqtt_discovery_prefix}/sensor/{component_id}/{key}/config"
+            )
+            messages.append(client.publish(topic, b"", qos=1, retain=True))
+        for key, _, _ in binary_sensors:
+            topic = (
+                f"{settings.mqtt_discovery_prefix}/binary_sensor/"
+                f"{component_id}/{key}/config"
+            )
+            messages.append(client.publish(topic, b"", qos=1, retain=True))
+        state_topic = f"{settings.mqtt_topic}/{location_key}/state"
+        messages.append(client.publish(state_topic, b"", qos=1, retain=True))
     try:
         for message in messages:
             message.wait_for_publish()

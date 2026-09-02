@@ -14,21 +14,40 @@ logger = logging.getLogger(__name__)
 
 
 async def run_once(settings: Settings, client: CwaRadarClient | None = None) -> dict:
-    if settings.demo:
-        frames = demo_frames(settings.latitude, settings.longitude)
-    elif client is not None:
+    locations = settings.locations()
+    frames = None
+    if not settings.demo and client is not None:
         frames = await client.fetch_frames(settings.history_frames)
-    else:
+    elif not settings.demo:
         temporary_client = CwaRadarClient()
         try:
             frames = await temporary_client.fetch_frames(settings.history_frames)
         finally:
             await temporary_client.close()
-    result = analyze(frames, settings.latitude, settings.longitude,
-                     settings.rain_threshold_dbz, settings.incoming_radius_km)
-    publish(settings, result)
-    print(json.dumps(result.as_dict(), ensure_ascii=False, indent=2))
-    return result.as_dict()
+
+    results = []
+    output = {}
+    for location in locations:
+        location_frames = (
+            demo_frames(location.latitude, location.longitude)
+            if settings.demo
+            else frames
+        )
+        if location_frames is None:
+            raise RuntimeError("radar frames are unavailable")
+        result = analyze(
+            location_frames,
+            location.latitude,
+            location.longitude,
+            settings.rain_threshold_dbz,
+            settings.incoming_radius_km,
+        )
+        results.append((location, result))
+        output[location.key] = {"name": location.name, **result.as_dict()}
+
+    publish(settings, results)
+    print(json.dumps({"locations": output}, ensure_ascii=False, indent=2))
+    return output
 
 
 async def run(settings: Settings, once: bool) -> None:

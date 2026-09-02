@@ -1,10 +1,37 @@
 configuration:
+  location_name:
+    name: First location name
+    description: Display name for the first coordinate pair.
   latitude:
-    name: Latitude
-    description: Latitude of the location to monitor.
+    name: First location latitude
+    description: Latitude of the first location to monitor.
   longitude:
-    name: Longitude
-    description: Longitude of the location to monitor.
+    name: First location longitude
+    description: Longitude of the first location to monitor.
+  location_2_enabled:
+    name: Enable second location
+    description: Monitor a second coordinate pair.
+  location_2_name:
+    name: Second location name
+    description: Display name for the second coordinate pair.
+  latitude_2:
+    name: Second location latitude
+    description: Required when the second location is enabled.
+  longitude_2:
+    name: Second location longitude
+    description: Required when the second location is enabled.
+  location_3_enabled:
+    name: Enable third location
+    description: Monitor a third coordinate pair.
+  location_3_name:
+    name: Third location name
+    description: Display name for the third coordinate pair.
+  latitude_3:
+    name: Third location latitude
+    description: Required when the third location is enabled.
+  longitude_3:
+    name: Third location longitude
+    description: Required when the third location is enabled.
   rain_threshold_dbz:
     name: Rain threshold
     description: Minimum radar reflectivity in dBZ treated as rain.
