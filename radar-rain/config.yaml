@@ -1,5 +1,5 @@
 name: Taiwan Radar Rain
-version: "0.2.0"
+version: "0.2.1"
 slug: taiwan_radar_rain
 description: CWA radar rain detection and Home Assistant MQTT sensors
 url: https://github.com/TWei-1101/taiwan-radar-rain

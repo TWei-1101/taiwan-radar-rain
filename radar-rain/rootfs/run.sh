@@ -18,4 +18,5 @@ LOG_LEVEL="$(bashio::config 'log_level')"
 bashio::log.info "Starting Taiwan Radar Rain for the configured location"
 bashio::log.info "CWA radar refresh interval: ${INTERVAL_SECONDS} seconds"
 
+cd /opt/radar-rain
 exec python3 -m radar_rain.cli --log-level "${LOG_LEVEL}"
