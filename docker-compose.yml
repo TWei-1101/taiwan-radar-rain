@@ -1,0 +1,7 @@
+services:
+  radar-rain:
+    build: .
+    container_name: taiwan-radar-rain
+    restart: unless-stopped
+    env_file: .env
+
