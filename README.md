@@ -66,3 +66,15 @@ HOME_LATITUDE=25.033 HOME_LONGITUDE=121.5654 radar-rain --once
 雷達資料：中央氣象署氣象資料開放平臺，`O-A0059-001 雷達整合回波資料`，資料更新頻率約 10 分鐘，依政府資料開放授權條款第 1 版使用。
 
 程式碼採 MIT License。
+
+## Home Assistant App（Add-on）
+
+本 repository 也可直接加入 Home Assistant App Store：
+
+1. 開啟「設定 → 附加元件 → 附加元件商店」。
+2. 右上角選單開啟「儲存庫」。
+3. 加入 `https://github.com/TWei-1101/taiwan-radar-rain`。
+4. 安裝 **Taiwan Radar Rain**。
+5. 在設定頁填入監測位置的經緯度後啟動。
+
+App 需要 Mosquitto Broker，會透過 Supervisor Services API 自動取得 MQTT 連線資訊，不必在設定頁輸入 MQTT 帳號或密碼。

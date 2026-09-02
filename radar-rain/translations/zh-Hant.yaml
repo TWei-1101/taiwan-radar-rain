@@ -1,0 +1,22 @@
+configuration:
+  latitude:
+    name: 緯度
+    description: 要監測位置的緯度。
+  longitude:
+    name: 經度
+    description: 要監測位置的經度。
+  rain_threshold_dbz:
+    name: 降雨門檻
+    description: 判定為降雨的最低雷達回波強度（dBZ）。
+  incoming_radius_km:
+    name: 接近雨區搜尋半徑
+    description: 搜尋接近雨區的半徑，單位為公里。
+  interval_seconds:
+    name: 更新間隔
+    description: 雷達檢查間隔秒數；中央氣象署資料通常每 10 分鐘更新。
+  history_frames:
+    name: 雷達歷史幀數
+    description: 用於估算雨區移動的最近雷達幀數。
+  log_level:
+    name: 紀錄層級
+    description: App 執行紀錄的詳細程度。

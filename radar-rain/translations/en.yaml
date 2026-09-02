@@ -1,0 +1,22 @@
+configuration:
+  latitude:
+    name: Latitude
+    description: Latitude of the location to monitor.
+  longitude:
+    name: Longitude
+    description: Longitude of the location to monitor.
+  rain_threshold_dbz:
+    name: Rain threshold
+    description: Minimum radar reflectivity in dBZ treated as rain.
+  incoming_radius_km:
+    name: Incoming rain radius
+    description: Radius in kilometres used to search for approaching rain.
+  interval_seconds:
+    name: Update interval
+    description: Seconds between radar checks; CWA data normally updates every 10 minutes.
+  history_frames:
+    name: Radar history frames
+    description: Number of recent frames used for movement estimation.
+  log_level:
+    name: Log level
+    description: Verbosity of application logs.
