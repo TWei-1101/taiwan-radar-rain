@@ -1,5 +1,5 @@
 name: Taiwan Radar Rain
-version: "0.4.0"
+version: "0.4.1"
 slug: taiwan_radar_rain
 description: CWA radar rain detection and Home Assistant MQTT sensors
 url: https://github.com/TWei-1101/taiwan-radar-rain
@@ -18,8 +18,12 @@ options:
   longitude: null
   location_2_enabled: false
   location_2_name: Location 2
+  latitude_2: ""
+  longitude_2: ""
   location_3_enabled: false
   location_3_name: Location 3
+  latitude_3: ""
+  longitude_3: ""
   rain_threshold_dbz: 18.0
   incoming_radius_km: 40.0
   interval_seconds: 600
@@ -31,12 +35,12 @@ schema:
   longitude: float
   location_2_enabled: bool
   location_2_name: str
-  latitude_2: "float?"
-  longitude_2: "float?"
+  latitude_2: "str?"
+  longitude_2: "str?"
   location_3_enabled: bool
   location_3_name: str
-  latitude_3: "float?"
-  longitude_3: "float?"
+  latitude_3: "str?"
+  longitude_3: "str?"
   rain_threshold_dbz: "float(0,80)"
   incoming_radius_km: "float(1,100)"
   interval_seconds: "int(300,3600)"

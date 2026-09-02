@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.4.1
+
+- Always show the optional latitude and longitude fields in the App configuration form.
+- Allow unused optional locations to keep their coordinate fields empty.
+
 ## 0.4.0
 
 - Support up to three independently named monitoring locations.

@@ -149,3 +149,16 @@ def test_primary_mqtt_identity_stays_backward_compatible():
         "taiwan_radar_rain_location_2",
         "home/radar_rain/location_2/state",
     )
+
+
+def test_empty_optional_coordinates_from_app_config(monkeypatch):
+    monkeypatch.setenv("HOME_LATITUDE", "25.0")
+    monkeypatch.setenv("HOME_LONGITUDE", "121.2")
+    monkeypatch.setenv("LOCATION_2_LATITUDE", "")
+    monkeypatch.setenv("LOCATION_2_LONGITUDE", "")
+
+    settings = Settings.from_env()
+
+    assert settings.latitude_2 is None
+    assert settings.longitude_2 is None
+    assert [location.key for location in settings.locations()] == ["primary"]
