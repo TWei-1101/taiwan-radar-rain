@@ -44,4 +44,23 @@ def test_current_rain():
     assert result.raining is True
     assert result.status == "raining"
     assert result.intensity == "moderate"
+    assert result.rain_stop_eta_min is None
 
+
+def test_predicts_rain_stopping_when_echo_moves_away():
+    row, col = latlon_to_index(23.7, 121.0)
+    yy, xx = np.ogrid[:GRID_HEIGHT, :GRID_WIDTH]
+    old_grid = np.full((GRID_HEIGHT, GRID_WIDTH), np.nan, dtype=np.float32)
+    new_grid = old_grid.copy()
+    old_grid[(yy - row) ** 2 + (xx - (col - 4)) ** 2 <= 2**2] = 35
+    new_grid[(yy - row) ** 2 + (xx - col) ** 2 <= 2**2] = 35
+    frames = [
+        RadarFrame(datetime(2026, 1, 1, 0, 0, tzinfo=UTC), old_grid),
+        RadarFrame(datetime(2026, 1, 1, 0, 10, tzinfo=UTC), new_grid),
+    ]
+
+    result = analyze(frames, 23.7, 121.0)
+
+    assert result.raining is True
+    assert result.motion_direction == "E"
+    assert result.rain_stop_eta_min == 10

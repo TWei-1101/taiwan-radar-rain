@@ -16,6 +16,7 @@ class RainResult:
     raining: bool
     rain_incoming: bool
     rain_eta_min: int | None
+    rain_stop_eta_min: int | None
     max_dbz_1km: float
     max_dbz_3km: float
     max_dbz_10km: float
@@ -99,6 +100,21 @@ def _intensity(dbz: float) -> str:
     return "severe"
 
 
+def _shift_mask(mask: np.ndarray, dy: int, dx: int) -> np.ndarray:
+    """Translate a mask without wrapping data across the grid edges."""
+    shifted = np.zeros_like(mask, dtype=bool)
+    height, width = mask.shape
+    src_y0, src_y1 = max(0, -dy), min(height, height - dy)
+    src_x0, src_x1 = max(0, -dx), min(width, width - dx)
+    dst_y0, dst_y1 = max(0, dy), min(height, height + dy)
+    dst_x0, dst_x1 = max(0, dx), min(width, width + dx)
+    if src_y0 < src_y1 and src_x0 < src_x1:
+        shifted[dst_y0:dst_y1, dst_x0:dst_x1] = mask[
+            src_y0:src_y1, src_x0:src_x1
+        ]
+    return shifted
+
+
 def analyze(frames: list[RadarFrame], lat: float, lon: float, threshold: float = 18.0,
             incoming_radius_km: float = 40.0) -> RainResult:
     if len(frames) < 2:
@@ -126,24 +142,30 @@ def analyze(frames: list[RadarFrame], lat: float, lon: float, threshold: float =
         speed = 0.0
 
     eta = None
+    stop_eta = None
     incoming = False
-    if not raining and (dy != 0 or dx != 0):
+    if dy != 0 or dx != 0:
         rain_mask = np.nan_to_num(current.dbz, nan=-99) >= threshold
         home_radius_px = max(1, int(np.ceil(1 / min(x_km, y_km))))
         yy, xx = np.ogrid[: current.dbz.shape[0], : current.dbz.shape[1]]
         home = (yy - row) ** 2 + (xx - col) ** 2 <= home_radius_px**2
         interval_min = max(1, round((current.observed_at - previous.observed_at).total_seconds() / 60))
         for step in range(1, 7):
-            shifted = np.roll(rain_mask, (dy * step, dx * step), axis=(0, 1))
-            if np.any(shifted & home):
+            shifted = _shift_mask(rain_mask, dy * step, dx * step)
+            future_rain = bool(np.any(shifted & home))
+            if not raining and future_rain:
                 eta = step * interval_min
                 incoming = True
+                break
+            if raining and not future_rain:
+                stop_eta = step * interval_min
                 break
 
     status = "raining" if raining else ("rain_incoming" if incoming else "dry")
     return RainResult(
         observed_at=current.observed_at.isoformat(), status=status, intensity=_intensity(max1),
         raining=raining, rain_incoming=incoming, rain_eta_min=eta,
+        rain_stop_eta_min=stop_eta,
         max_dbz_1km=max1, max_dbz_3km=max3, max_dbz_10km=max10,
         incoming_max_dbz=incoming_max, rain_distance_km=distance,
         motion_direction=_direction(dy, dx), motion_speed_kmh=speed,

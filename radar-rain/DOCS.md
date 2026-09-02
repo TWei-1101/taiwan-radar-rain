@@ -24,7 +24,9 @@ log_level: info
 
 ## Home Assistant 實體
 
-MQTT Discovery 會自動建立目前降雨、雨區接近、ETA、1/3/10 km 最大 dBZ、雨區距離、移動方向與速度等實體。
+MQTT Discovery 會自動建立目前降雨、雨區接近、開始／停止降雨 ETA、1/3/10 km 最大 dBZ、雨區距離、移動方向與速度等實體。
+
+預估停雨時間是將最近兩張雷達圖的移動趨勢外推 10～60 分鐘。若雨區移動不明顯、追蹤可信度不足，或預計一小時後仍在下雨，該實體會顯示未知。
 
 若沒有出現實體，請先確認 Mosquitto Broker 與 MQTT integration 正常，再查看 App 的「紀錄」頁。
 

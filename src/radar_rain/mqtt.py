@@ -11,10 +11,11 @@ SENSORS = {
     "status": ("Radar rain status", None, None),
     "intensity": ("Radar rain intensity", None, None),
     "rain_eta_min": ("Radar rain ETA", "min", "duration"),
+    "rain_stop_eta_min": ("Radar rain stop ETA", "min", "duration"),
     "max_dbz_1km": ("Radar max dBZ 1 km", "dBZ", None),
     "max_dbz_3km": ("Radar max dBZ 3 km", "dBZ", None),
     "max_dbz_10km": ("Radar max dBZ 10 km", "dBZ", None),
-    "incoming_max_dbz": ("Radar incoming max dBZ", "dBZ", None),
+    "incoming_max_dbz": ("Radar nearby max dBZ", "dBZ", None),
     "rain_distance_km": ("Radar rain distance", "km", "distance"),
     "motion_direction": ("Radar motion direction", None, None),
     "motion_speed_kmh": ("Radar motion speed", "km/h", "speed"),
@@ -49,12 +50,18 @@ def publish(settings: Settings, result: RainResult) -> None:
             payload["device_class"] = device_class
         topic = f"{settings.mqtt_discovery_prefix}/sensor/taiwan_radar_rain/{key}/config"
         messages.append(client.publish(topic, json.dumps(payload), qos=1, retain=True))
-    for key, name in (("raining", "Radar raining"), ("rain_incoming", "Radar rain incoming")):
+    binary_sensors = (
+        ("raining", "Radar raining", "moisture"),
+        ("rain_incoming", "Radar rain approaching", None),
+    )
+    for key, name, device_class in binary_sensors:
         payload = {
             "name": name, "unique_id": f"taiwan_radar_rain_{key}", "state_topic": state_topic,
             "value_template": "{{ 'ON' if value_json." + key + " else 'OFF' }}",
-            "payload_on": "ON", "payload_off": "OFF", "device_class": "moisture", "device": device,
+            "payload_on": "ON", "payload_off": "OFF", "device": device,
         }
+        if device_class:
+            payload["device_class"] = device_class
         topic = f"{settings.mqtt_discovery_prefix}/binary_sensor/taiwan_radar_rain/{key}/config"
         messages.append(client.publish(topic, json.dumps(payload), qos=1, retain=True))
     messages.append(
